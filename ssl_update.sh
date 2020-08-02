@@ -8,6 +8,8 @@ domain=$(grep '\"add\"' $v2ray_qr_config_file | awk -F '"' '{print $4}')
 systemctl stop nginx &> /dev/null
 sleep 1
 "/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" &> /dev/null
-"/root/.acme.sh"/acme.sh --installcert -d ${domain} --fullchainpath /data/v2ray.crt --keypath /data/v2ray.key --ecc
+"/root/.acme.sh"/acme.sh --installcert -d ${domain} --fullchainpath /home/v2ray.crt --keypath /home/v2ray.key --ecc
+sleep1
+openssl x509 -in /home/v2ray.crt -out /home/v2ray.pem
 sleep 1
 systemctl start nginx &> /dev/null
