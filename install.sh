@@ -477,7 +477,10 @@ acme() {
         echo -e "${OK} ${GreenBG} SSL 证书生成成功 ${Font}"
         sleep 2
         mkdir /data
-        if "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath /data/v2ray.crt --keypath /data/v2ray.key --ecc --force; then
+        if "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath /home/v2ray.crt --keypath /home/v2ray.key --ecc --force; then
+            sleep 2
+            openssl x509 -in /home/v2ray.crt -out /home/v2ray.pem
+            sleep 2
             echo -e "${OK} ${GreenBG} 证书配置成功 ${Font}"
             sleep 2
         fi
@@ -526,8 +529,8 @@ nginx_conf_add() {
     server {
         listen 443 ssl http2;
         listen [::]:443 http2;
-        ssl_certificate       /data/v2ray.crt;
-        ssl_certificate_key   /data/v2ray.key;
+        ssl_certificate       /home/v2ray.crt;
+        ssl_certificate_key   /home/v2ray.key;
         ssl_protocols         TLSv1.3;
         ssl_ciphers           TLS13-AES-256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES-128-GCM-SHA256:TLS13-AES-128-CCM-8-SHA256:TLS13-AES-128-CCM-SHA256:EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+ECDSA+AES128:EECDH+aRSA+AES128:RSA+AES128:EECDH+ECDSA+AES256:EECDH+aRSA+AES256:RSA+AES256:EECDH+ECDSA+3DES:EECDH+aRSA+3DES:RSA+3DES:!MD5;
         server_name           serveraddr.com;
@@ -720,7 +723,7 @@ show_information() {
     cat "${v2ray_info_file}"
 }
 ssl_judge_and_install() {
-    if [[ -f "/data/v2ray.key" || -f "/data/v2ray.crt" ]]; then
+    if [[ -f "/home/v2ray.key" || -f "/home/v2ray.crt" ]]; then
         echo "/data 目录下证书文件已存在"
         echo -e "${OK} ${GreenBG} 是否删除 [Y/N]? ${Font}"
         read -r ssl_delete
@@ -734,11 +737,11 @@ ssl_judge_and_install() {
         esac
     fi
 
-    if [[ -f "/data/v2ray.key" || -f "/data/v2ray.crt" ]]; then
+    if [[ -f "/home/v2ray.key" || -f "/home/v2ray.crt" ]]; then
         echo "证书文件已存在"
     elif [[ -f "$HOME/.acme.sh/${domain}_ecc/${domain}.key" && -f "$HOME/.acme.sh/${domain}_ecc/${domain}.cer" ]]; then
         echo "证书文件已存在"
-        "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath /data/v2ray.crt --keypath /data/v2ray.key --ecc
+        "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath /home/v2ray.crt --keypath /home/v2ray.key --ecc
         judge "证书应用"
     else
         ssl_install
@@ -803,7 +806,9 @@ show_error_log() {
 ssl_update_manuel() {
     [ -f ${amce_sh_file} ] && "/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" || echo -e "${RedBG}证书签发工具不存在，请确认你是否使用了自己的证书${Font}"
     domain="$(info_extraction '\"add\"')"
-    "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath /data/v2ray.crt --keypath /data/v2ray.key --ecc
+    "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath /home/v2ray.crt --keypath /home/v2ray.key --ecc
+    sleep2
+    openssl x509 -in /home/v2ray.crt -out /home/v2ray.pem
 }
 bbr_boost_sh() {
     [ -f "tcp.sh" ] && rm -rf ./tcp.sh
