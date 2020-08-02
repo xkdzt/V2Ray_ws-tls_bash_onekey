@@ -476,7 +476,6 @@ acme() {
     if "$HOME"/.acme.sh/acme.sh --issue -d "${domain}" --standalone -k ec-256 --force; then
         echo -e "${OK} ${GreenBG} SSL 证书生成成功 ${Font}"
         sleep 2
-        mkdir /data
         if "$HOME"/.acme.sh/acme.sh --installcert -d "${domain}" --fullchainpath /home/v2ray.crt --keypath /home/v2ray.key --ecc --force; then
             sleep 2
             openssl x509 -in /home/v2ray.crt -out /home/v2ray.pem
@@ -724,12 +723,17 @@ show_information() {
 }
 ssl_judge_and_install() {
     if [[ -f "/home/v2ray.key" || -f "/home/v2ray.crt" ]]; then
-        echo "/data 目录下证书文件已存在"
+        echo "/home 目录下证书文件已存在"
         echo -e "${OK} ${GreenBG} 是否删除 [Y/N]? ${Font}"
         read -r ssl_delete
         case $ssl_delete in
         [yY][eE][sS] | [yY])
-            rm -rf /data/*
+            rm /home/v2ray.key
+            sleep 2
+            rm /home/v2ray.crt
+            sleep 2
+            rm /home/v2ray.pem
+            sleep 2
             echo -e "${OK} ${GreenBG} 已删除 ${Font}"
             ;;
         *) ;;
